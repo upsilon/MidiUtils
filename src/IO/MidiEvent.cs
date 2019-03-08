@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *          http://www2s.biglobe.ne.jp/~yyagi/material/smfspec.html
  */
 
+using System;
 using System.IO;
 
 namespace MidiUtils.IO
@@ -105,6 +106,16 @@ namespace MidiUtils.IO
         /// </summary>
         /// <returns>このインスタンスを表す文字列。</returns>
         public override string ToString() => $"{Type}, Channel={Channel}, Control={Data1}";
+
+        public static MidiEvent FromBytes(ReadOnlySpan<byte> span)
+        {
+            var eventType = (EventType)(span[0] & 0xf0);
+            var channel = span[0] & 0x0f;
+            var data1 = span.Length >= 2 ? span[1] : 0;
+            var data2 = span.Length >= 3 ? span[2] : 0;
+
+            return new MidiEvent(eventType, channel, data1, data2);
+        }
 
         #endregion
 
