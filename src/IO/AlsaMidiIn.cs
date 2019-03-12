@@ -68,14 +68,15 @@ namespace MidiUtils.IO
         {
             this.pollLoopActive = false;
             this.pollLoopTask?.Wait();
+
+            this.seqencerHandle?.Dispose();
+            this.parserHandle?.Dispose();
+
+            this.Closed?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose()
-        {
-            this.Stop();
-            this.seqencerHandle?.Dispose();
-            this.parserHandle?.Dispose();
-        }
+            => this.Stop();
 
         private void InitializeSequencer()
         {
@@ -145,9 +146,6 @@ namespace MidiUtils.IO
 
                 switch (evt.type)
                 {
-                    case snd_seq_event_type.SND_SEQ_EVENT_CLIENT_EXIT:
-                        this.Closed?.Invoke(this, EventArgs.Empty);
-                        break;
                     case snd_seq_event_type.SND_SEQ_EVENT_SYSEX:
                         this.HandleMidiSysexEvent(evt);
                         break;
@@ -162,7 +160,7 @@ namespace MidiUtils.IO
         private void HandleMidiSysexEvent(in snd_seq_event evt)
         {
             unsafe ReadOnlySpan<byte> GetExternalData(in snd_seq_event e)
-                => new Span<byte>(e.data_ext_ptr.ToPointer(), (int)e.data_ext_len);
+                => new ReadOnlySpan<byte>(e.data_ext_ptr.ToPointer(), (int)e.data_ext_len);
 
             var message = GetExternalData(evt).ToArray();
             this.ReceivedExclusiveMessage?.Invoke(this, new ReceivedExclusiveMessageEventArgs(message, this));
@@ -182,7 +180,7 @@ namespace MidiUtils.IO
                 throw new AlsaException($"{nameof(snd_midi_event_decode)} fails", errnum: length);
             }
 
-            var midiEvent = MidiEvent.FromBytes(buffer.Slice(0, length));
+            var midiEvent = new MidiEvent(buffer.Slice(0, length));
             this.ReceivedMidiEvent?.Invoke(this, new ReceivedMidiEventEventArgs(midiEvent, this));
         }
     }

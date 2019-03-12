@@ -102,20 +102,27 @@ namespace MidiUtils.IO
         }
 
         /// <summary>
+        /// パラメータを指定して新しい <see cref="MidiEvent"/> クラスのインスタンスを初期化します。
+        /// </summary>
+        /// <param name="span">MIDIメッセージ。</param>
+        public MidiEvent(ReadOnlySpan<byte> span)
+            : base(deltaTime: 0, tick: 0)
+        {
+            Type = (EventType)(span[0] & 0xf0);
+            Channel = span[0] & 0x0f;
+
+            if (span.Length >= 2)
+                Data1 = span[1];
+
+            if (span.Length >= 3)
+                Data2 = span[2];
+        }
+
+        /// <summary>
         /// このインスタンスを表す文字列を取得します。
         /// </summary>
         /// <returns>このインスタンスを表す文字列。</returns>
         public override string ToString() => $"{Type}, Channel={Channel}, Control={Data1}";
-
-        public static MidiEvent FromBytes(ReadOnlySpan<byte> span)
-        {
-            var eventType = (EventType)(span[0] & 0xf0);
-            var channel = span[0] & 0x0f;
-            var data1 = span.Length >= 2 ? span[1] : 0;
-            var data2 = span.Length >= 3 ? span[2] : 0;
-
-            return new MidiEvent(eventType, channel, data1, data2);
-        }
 
         #endregion
 
