@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 
 namespace MidiUtils.IO
 {
-    public class MidiIn : IDisposable
+    public class WinmmMidiIn : IMidiIn
     {
         #region -- Private Fields --
 
@@ -117,7 +117,7 @@ namespace MidiUtils.IO
         /// サンプリング周波数とデバイス ID を指定して新しい MidiInConnector クラスのインスタンスを初期化します。
         /// </summary>
         /// <param name="id">オープンされる MIDI-IN デバイスの ID。</param>
-        public MidiIn(int id)
+        public WinmmMidiIn(int id)
         {
             CheckPlatform();
 
@@ -411,47 +411,5 @@ namespace MidiUtils.IO
                 public IntPtr[] reservedArray;
             }
         }
-    }
-
-    public class ReceivedMidiEventEventArgs : EventArgs
-    {
-        #region -- Public Properties --
-
-        public MidiEvent Event { get; private set; }
-
-        public MidiIn MidiIn { get; private set; }
-
-        #endregion
-
-        #region -- Constructors --
-
-        public ReceivedMidiEventEventArgs(MidiEvent @event, MidiIn midiIn)
-        {
-            Event = @event;
-            MidiIn = midiIn;
-        }
-
-        #endregion
-    }
-
-    public class ReceivedExclusiveMessageEventArgs : EventArgs
-    {
-        #region -- Public Properties --
-
-        public IEnumerable<byte> Message { get; private set; }
-
-        public MidiIn MidiIn { get; private set; }
-
-        #endregion
-
-        #region -- Constructors --
-
-        public ReceivedExclusiveMessageEventArgs(IEnumerable<byte> message, MidiIn midiIn)
-        {
-            Message = message;
-            MidiIn = midiIn;
-        }
-
-        #endregion
     }
 }

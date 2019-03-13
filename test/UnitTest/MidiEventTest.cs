@@ -1,5 +1,6 @@
 ﻿using MidiUtils.IO;
 using NUnit.Framework;
+using System;
 
 // ReSharper disable UnusedVariable
 
@@ -16,6 +17,20 @@ namespace UnitTest
         public void CtorTest(EventType type, int channel, int data1, int data2)
         {
             var midiEvent = new MidiEvent(type, channel, data1, data2);
+
+            Assert.AreEqual(type, midiEvent.Type);
+            Assert.AreEqual(channel, midiEvent.Channel);
+            Assert.AreEqual(data1, midiEvent.Data1);
+            Assert.AreEqual(data2, midiEvent.Data2);
+        }
+
+        [Test]
+        [TestCase(new byte[] { 0xff }, (EventType)0xf0, 0x0f, 0x00, 0x00)]
+        [TestCase(new byte[] { 0xC1, 0x45 }, EventType.ProgramChange, 0x01, 0x45, 0x00)]
+        [TestCase(new byte[] { 0x91, 0x45, 0x7f }, EventType.NoteOn, 0x01, 0x45, 0x7f)]
+        public void CtorSpanTest(byte[] data, EventType type, int channel, int data1, int data2)
+        {
+            var midiEvent = new MidiEvent(data.AsSpan());
 
             Assert.AreEqual(type, midiEvent.Type);
             Assert.AreEqual(channel, midiEvent.Channel);

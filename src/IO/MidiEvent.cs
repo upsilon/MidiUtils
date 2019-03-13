@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *          http://www2s.biglobe.ne.jp/~yyagi/material/smfspec.html
  */
 
+using System;
 using System.IO;
 
 namespace MidiUtils.IO
@@ -98,6 +99,23 @@ namespace MidiUtils.IO
             Channel = channel;
             Data1 = data1;
             Data2 = data2;
+        }
+
+        /// <summary>
+        /// パラメータを指定して新しい <see cref="MidiEvent"/> クラスのインスタンスを初期化します。
+        /// </summary>
+        /// <param name="span">MIDIメッセージ。</param>
+        public MidiEvent(ReadOnlySpan<byte> span)
+            : base(deltaTime: 0, tick: 0)
+        {
+            Type = (EventType)(span[0] & 0xf0);
+            Channel = span[0] & 0x0f;
+
+            if (span.Length >= 2)
+                Data1 = span[1];
+
+            if (span.Length >= 3)
+                Data2 = span[2];
         }
 
         /// <summary>
